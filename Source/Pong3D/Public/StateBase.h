@@ -22,5 +22,5 @@ public:
 
     virtual void Update(AActor* Owner, UUStateMachineComponent* StateMachine, float DeltaTime) PURE_VIRTUAL(UStateBase::Update);
 
-    virtual UStateBase* HandleInput(AActor* Owner, UUStateMachineComponent* StateMachine) PURE_VIRTUAL(UStateBase::HandleInput, return nullptr; );
+    virtual UStateBase* HandleInput(AActor* Owner, UUStateMachineComponent* StateMachine) PURE_VIRTUAL(UStateBase::HandleInput, return nullptr;);
 };

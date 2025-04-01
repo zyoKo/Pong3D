@@ -121,7 +121,6 @@ void ABall::OnComponentBeginOverlapImpl(UPrimitiveComponent* OverlappedComponent
 		PongGameMode->PaddleThatScoredLastPoint = EPaddleType::PLAYER_2;
 
 		//StateMachine->ChangeState(NewObject<UBallStateIdle>(this));
-		ResetBall();
 	}
 
 	if (RightPlayerTriggerBox && OtherActor == RightPlayerTriggerBox && PongGameMode)
@@ -130,7 +129,6 @@ void ABall::OnComponentBeginOverlapImpl(UPrimitiveComponent* OverlappedComponent
 		PongGameMode->PaddleThatScoredLastPoint = EPaddleType::PLAYER_1;
 
 		//StateMachine->ChangeState(NewObject<UBallStateIdle>(this));
-		ResetBall();
 	}
 }
 

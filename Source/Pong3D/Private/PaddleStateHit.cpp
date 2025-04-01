@@ -5,6 +5,7 @@
 
 #include "UStateMachineComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/BoxComponent.h"
 
 #include "PaddleStateIdle.h"
 #include "PaddleStateMoving.h"
@@ -32,35 +33,29 @@ void UPaddleStateHit::Enter(AActor* Owner, UUStateMachineComponent* StateMachine
 void UPaddleStateHit::ReflectBallFromPaddle(AActor* PaddleActor, UUStateMachineComponent* StateMachine) const
 {
     APaddle* Paddle = Cast<APaddle>(PaddleActor);
-    if (!Paddle) 
-    {
-    	return;
-    }
+    if (!Paddle) return;
 
     ABall* Ball = Cast<ABall>(UGameplayStatics::GetActorOfClass(Paddle->GetWorld(), ABall::StaticClass()));
-    if (!Ball) 
+    if (!Ball) return;
+
+    float PaddleInput = Paddle->GetMovementAxisValue();
+
+    // Determine X direction: if paddle is on left side, go right (+X), else left (-X)
+    float XDirection = Paddle->GetActorLocation().X < 0 ? 1.0f : -1.0f;
+
+    FVector ReflectDirection = FVector(XDirection, 0.0f, PaddleInput * 0.4f); // Small Z influence
+    ReflectDirection = ReflectDirection.GetSafeNormal();
+
+    float BallSpeed = 1000.0f; //Ball->GetInitialSpeed(); // You must track this value somewhere
+    FVector NewVelocity = ReflectDirection * BallSpeed;
+
+    UBoxComponent* BallComponent = Cast<UBoxComponent>(Ball->GetComponentByClass(UBoxComponent::StaticClass()));
+    if (BallComponent)
     {
-    	return;
+        BallComponent->SetPhysicsLinearVelocity(NewVelocity, false);
     }
 
-    FVector BallVelocity = Ball->GetVelocity();
+    UE_LOG(LogTemp, Log, TEXT("Ball reflected with stable X direction. Velocity: %s"), *NewVelocity.ToString());
 
-    // Reverse X-direction
-    BallVelocity.X *= -1;
-
-    // Add vertical influence based on last paddle movement input
-    // Check last state, if Idle reflect Normally but if Moving then adjust influence strength
-
-    bool isPreviousStateMovingState = dynamic_cast<UPaddleStateMoving*>(StateMachine->GetPreviousState()) != nullptr;
-	if ( isPreviousStateMovingState )
-    {
-    	float PaddleInput = Paddle->GetMovementAxisValue();
-        BallVelocity.Z += PaddleInput * 300.0f; // Adjust influence strength as needed
-        auto* BallStaticMeshComponent = Ball->GetComponentByClass<UStaticMeshComponent>();
-		BallStaticMeshComponent->SetPhysicsLinearVelocity(BallVelocity); // Assumes ABall has SetVelocity(FVector)
-
-        UE_LOG(LogTemp, Log, TEXT("Ball reflected: new velocity = %s"), *BallVelocity.ToString());
-
-        TransitionState(PaddleActor, StateMachine, EPaddleState::MOVING);
-    }
+    TransitionState(PaddleActor, StateMachine, EPaddleState::MOVING);
 }

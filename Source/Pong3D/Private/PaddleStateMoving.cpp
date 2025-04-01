@@ -31,10 +31,18 @@ void UPaddleStateMoving::Update(AActor* Owner, UUStateMachineComponent* StateMac
 		return;
 	}
 
-	// Get physics component
-	UPrimitiveComponent* PhysicsComp = Paddle->GetCollider(); // or GetMesh() if using Mesh
+	// Get physics component (Make sure it's Root)
+	UPrimitiveComponent* PhysicsComp = Paddle->GetCollider();
 	if (!PhysicsComp || !PhysicsComp->IsSimulatingPhysics()) 
 	{
+		// Maintain constant velocity while clamping position manually
+		FVector NewLocation = Paddle->GetActorLocation();
+		NewLocation.Z += Paddle->GetMovementAxisValue() * Paddle->GetMoveSpeed() * DeltaTime;
+		Paddle->SetActorLocation(NewLocation);
+		
+		// Bounds Check
+		NewLocation.Z = FMath::Clamp(NewLocation.Z, -400.0f, 300.0f);
+
 		return;
 	}
 
@@ -43,21 +51,8 @@ void UPaddleStateMoving::Update(AActor* Owner, UUStateMachineComponent* StateMac
 	float Speed = Paddle->GetMoveSpeed();
 	FVector Velocity = FVector(0.0f, 0.0f, Input * Speed);
 
-	// Maintain constant velocity while clamping position manually
-	//FVector Location = Paddle->GetActorLocation();
-	//Location.Z = FMath::Clamp(Location.Z, -400.0f, 300.0f);
-	//Paddle->SetActorLocation(Location); // Clamp manually (physics won’t auto-do this)
-
 	// Apply velocity
 	PhysicsComp->SetPhysicsLinearVelocity(Velocity, false);
-
-	//FVector NewLocation = Paddle->GetActorLocation();
-	//NewLocation.Z += Paddle->GetMovementAxisValue() * Paddle->GetMoveSpeed() * DeltaTime;
-	//
-	//// Bounds Check
-	//NewLocation.Z = FMath::Clamp(NewLocation.Z, -400.0f, 300.0f);
-	//
-    //Paddle->SetActorLocation(NewLocation);
 }
 
 void UPaddleStateMoving::Exit(AActor* Owner, UUStateMachineComponent* StateMachine)

@@ -5,7 +5,6 @@
 
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
-#include "GameFramework/SpectatorPawn.h"
 
 #include "PongPlayerController.h"
 #include "Pong3D/Ball.h"
@@ -17,7 +16,9 @@ APongGameMode::APongGameMode()
     PlayerControllerClass = APongPlayerController::StaticClass();
 
     // Set default pawn to none, since we don't want the player to possess anything
-    DefaultPawnClass = ASpectatorPawn::StaticClass();
+    DefaultPawnClass = nullptr;
+
+	SpectatorClass = nullptr;
 }
 
 void APongGameMode::InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage)
@@ -29,6 +30,27 @@ void APongGameMode::InitGame(const FString& MapName, const FString& Options, FSt
 	FindOrSpawnPaddle(EPaddleType::PLAYER_2);
 }
 
+void APongGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+    if (!PlayerController) 
+    {
+    	return;
+    }
+
+    // Find CameraActor by tag
+    TArray<AActor*> FoundCameras;
+    UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("MainCamera"), FoundCameras);
+
+    if (FoundCameras.Num() > 0)
+    {
+        AActor* CameraActor = FoundCameras[0];
+        PlayerController->SetViewTarget(CameraActor);
+    }
+}
+
 void APongGameMode::FindOrSpawnPaddle(EPaddleType PaddleType) const
 {
 	UWorld* World = GetWorld();
@@ -38,20 +60,20 @@ void APongGameMode::FindOrSpawnPaddle(EPaddleType PaddleType) const
     }
 
     //-- Look for existing paddle of the given type --//
-    for (TActorIterator<APaddle> It(World); It; ++It)
+    TActorIterator<APaddle> PaddlesIterator(World);
+    for (; PaddlesIterator; ++PaddlesIterator)
     {
-        APaddle* Paddle = *It;
+        APaddle* Paddle = *PaddlesIterator;
         if (Paddle && Paddle->GetPaddleType() == PaddleType)
         {
-            return;  // Found one already in level
+			// If Found one already in level
+            return;
         }
     }
 	// --
 
     //-- Not found — spawn a new one --//
-
-	// Find Spawn Location based on PaddleType
-	FVector SpawnLocation = APaddle::GetSpawnLocationForPaddleType(PaddleType);
+	FVector SpawnLocation = GetSpawnLocationForPaddleType(PaddleType);
 
 	// Same for both the Paddles(No Rotation)
 	FRotator SpawnRotation = FRotator::ZeroRotator;
@@ -63,15 +85,44 @@ void APongGameMode::FindOrSpawnPaddle(EPaddleType PaddleType) const
     APaddle* NewPaddle = World->SpawnActor<APaddle>(APaddle::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
     if (NewPaddle)
     {
-        NewPaddle->SetPaddleType(PaddleType);  // Optional if you want to assign type after spawn
+        NewPaddle->SetPaddleType(PaddleType);
     }
+	//--
 }
 
-void APongGameMode::ResetBall()
+FVector APongGameMode::GetSpawnLocationForPaddleType(EPaddleType InPaddleType) const
 {
-	ABall* ball = Cast<ABall>(UGameplayStatics::GetActorOfClass(this, ABall::StaticClass()));
-	if (ball)
+    FVector SpawnLocation = FVector(0.0f, 0.0f, 0.0f);
+
+	APongGameMode* PongGameMode = Cast<APongGameMode>(UGameplayStatics::GetActorOfClass(GetWorld(), APongGameMode::StaticClass()));
+
+	if (!PongGameMode)
 	{
-		ball->ResetBall();
+		UE_LOG(LogTemp, Log, TEXT("Unable to find Pong Game Mode! Invalid Spawn Location sent as Origin!"));
+		return SpawnLocation;
 	}
+
+	switch (InPaddleType)
+	{
+	case EPaddleType::PLAYER_1:
+		{
+			SpawnLocation = PongGameMode->LeftPaddleSpawnLocation;
+		}
+		break;
+
+	case EPaddleType::PLAYER_2:
+	case EPaddleType::AI:
+		{
+			SpawnLocation = PongGameMode->RightPaddleSpawnLocation;
+		}
+		break;
+
+	case EPaddleType::NONE:
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed to Get Spawn Location! Provide a valid PaddleType!"));
+		}
+		break;
+	}
+
+	return SpawnLocation;
 }

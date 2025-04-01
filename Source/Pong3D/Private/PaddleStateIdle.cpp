@@ -2,25 +2,7 @@
 
 
 #include "PaddleStateIdle.h"
-
-#include "Kismet/GameplayStatics.h"
 #include "Pong3D/Paddle.h"
-
-void UPaddleStateIdle::Enter(AActor* Owner, UUStateMachineComponent* StateMachine)
-{
-	Super::Enter(Owner, StateMachine);
-
-	if (!Owner)
-	{
-		return;
-	}
-
-	APaddle* Paddle = Cast<APaddle>(Owner);
-	if (Paddle)
-	{
-		//Paddle->GetCollider()->SetPhysicsLinearVelocity(FVector::Zero());
-	}
-}
 
 void UPaddleStateIdle::Update(AActor* Owner, UUStateMachineComponent* StateMachine, float DeltaTime)
 {
@@ -28,16 +10,20 @@ void UPaddleStateIdle::Update(AActor* Owner, UUStateMachineComponent* StateMachi
 
 	GEngine->AddOnScreenDebugMessage(-1, 0.0f, FColor::Red, 
         FString::Printf(TEXT("Current State for %s: PaddleStateIdle!"), *Owner->GetName()));
-}
 
-void UPaddleStateIdle::Exit(AActor* Owner, UUStateMachineComponent* StateMachine)
-{
-	Super::Exit(Owner, StateMachine);
+	APaddle* Paddle = Cast<APaddle>(Owner);
+	UPrimitiveComponent* PhysicsComponent = Paddle->GetCollider();
+	if (PhysicsComponent)
+	{
+		FVector Velocity = PhysicsComponent->GetPhysicsLinearVelocity();
 
-
-}
-
-UStateBase* UPaddleStateIdle::HandleInput(AActor* Owner, UUStateMachineComponent* StateMachine)
-{
-	return Super::HandleInput(Owner, StateMachine);
+		if (!Velocity.IsNearlyZero())
+		{
+		    const float TimeToStop = 0.1f;
+		    FVector Acceleration = -Velocity / TimeToStop;
+		
+		    // Apply acceleration each tick (Frame-dependent)
+		    PhysicsComponent->AddForce(Acceleration * PhysicsComponent->GetMass()); // use AddForce for realistic mass
+		}
+	}
 }

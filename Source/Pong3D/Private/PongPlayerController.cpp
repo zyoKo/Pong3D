@@ -6,6 +6,8 @@
 #include "EngineUtils.h"
 
 #include "PaddleType.h"
+#include "Kismet/GameplayStatics.h"
+#include "Pong3D/Ball.h"
 #include "Pong3D/Paddle.h"
 
 void APongPlayerController::BeginPlay()
@@ -13,9 +15,9 @@ void APongPlayerController::BeginPlay()
     Super::BeginPlay();
 
     // Find paddles in the level by their PaddleType
-    for (TActorIterator<APaddle> It(GetWorld()); It; ++It)
+    for (TActorIterator<APaddle> PaddleIterator(GetWorld()); PaddleIterator; ++PaddleIterator)
     {
-        APaddle* Paddle = *It;
+        APaddle* Paddle = *PaddleIterator;
         if (!Paddle) continue;
 
         if (Paddle->GetPaddleType() == EPaddleType::PLAYER_1)
@@ -33,9 +35,17 @@ void APongPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
-    // Simple to use just one controller for local gameplay
+    ABall* Ball = Cast<ABall>(UGameplayStatics::GetActorOfClass(GetWorld(), ABall::StaticClass()));
+
+    // Bind Axis
     InputComponent->BindAxis("MoveLeftPaddle", this, &APongPlayerController::MoveLeftPaddle);
     InputComponent->BindAxis("MoveRightPaddle", this, &APongPlayerController::MoveRightPaddle);
+
+    // Bind Actions
+    if (Ball)
+    {
+		InputComponent->BindAction("LaunchBall", IE_Pressed, Ball, &ABall::LaunchBall);
+    }
 }
 
 void APongPlayerController::MoveLeftPaddle(float AxisValue)

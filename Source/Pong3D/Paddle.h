@@ -4,14 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-
-#include "PaddleType.h"
-
 #include "Paddle.generated.h"
 
 class UBoxComponent;
 class UStaticMeshComponent;
 class UUStateMachineComponent;
+
+enum class EPaddleType : uint8;
 
 UCLASS()
 class PONG3D_API APaddle : public APawn
@@ -31,23 +30,24 @@ class PONG3D_API APaddle : public APawn
 	float MovementAxisValue = 0.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Paddle")
-	EPaddleType PaddleType = EPaddleType::NONE;
+	EPaddleType PaddleType;
 
 	UPROPERTY(EditAnywhere, Category = "Sound Effects")
 	USoundBase* BounceSound;
 
+	// Fixing Sound Spam
+	mutable float LastSoundTime = -1.0f;
+
+	// Max delay between playing sounds
+	float SoundCooldown = 0.2f;
+
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
+    UUStateMachineComponent* StateMachine;
+
 public:
 	// Sets default values for this pawn's properties
 	APaddle();
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	UFUNCTION()
-	void OnBallHit();
-
-	UFUNCTION()
-	void OnMiss();
 
 	UFUNCTION()
 	float GetMovementAxisValue() const;
@@ -56,15 +56,14 @@ public:
 
 	UPrimitiveComponent* GetCollider() const;
 
+	/*
+	 * Setting Delegate Binding in PongPlayerController.cpp
+	 */
 	void Move(float AxisValue);
-
-	void MoveAI(float TargetZ, float DeltaTime);
 
 	EPaddleType GetPaddleType() const;
 
 	void SetPaddleType(EPaddleType InPaddleType);
-
-	static FVector GetSpawnLocationForPaddleType(EPaddleType InPaddleType);
 
 	UFUNCTION()
 	void OnComponentHitImpl(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
@@ -74,13 +73,4 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Components")
-    UUStateMachineComponent* StateMachine;
-
-    UPROPERTY(EditAnywhere, Category = "Gameplay")
-    int32 Lives = 3;
-
-public:	
-	
 };
