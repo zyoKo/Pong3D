@@ -3,6 +3,7 @@
 
 #include "UStateMachineComponent.h"
 
+// Project Includes
 #include "StateBase.h"
 
 // Sets default values for this component's properties
@@ -32,6 +33,7 @@ void UUStateMachineComponent::ChangeState(UStateBase* NewState)
 		return;
 	}
 
+	// Transition Logic of the States
 	CurrentState->Exit(GetOwner(), this);
 	PreviousState = CurrentState;
 	CurrentState = NewState;
@@ -55,6 +57,7 @@ void UUStateMachineComponent::TickComponent(float DeltaTime, ELevelTick TickType
 
     if (CurrentState)
     {
+		// Note: Handle Input needs to be removed not useful for this project
         UStateBase* NextState = CurrentState->HandleInput(GetOwner(), this);
         if (NextState && NextState != CurrentState)
         {

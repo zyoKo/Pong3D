@@ -7,7 +7,7 @@
 #include "BallStateMoving.generated.h"
 
 /**
- * 
+ * Currently do not have any implementation.
  */
 UCLASS()
 class PONG3D_API UBallStateMoving : public UBallStateBase

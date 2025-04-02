@@ -3,12 +3,14 @@
 
 #include "PongPlayerController.h"
 
+// Engine Includes
 #include "EngineUtils.h"
-
-#include "PaddleType.h"
 #include "Kismet/GameplayStatics.h"
-#include "Pong3D/Ball.h"
-#include "Pong3D/Paddle.h"
+
+// Project Includes
+#include "PaddleType.h"
+#include "Ball.h"
+#include "Paddle.h"
 
 void APongPlayerController::BeginPlay()
 {

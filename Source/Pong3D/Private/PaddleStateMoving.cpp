@@ -3,15 +3,8 @@
 
 #include "PaddleStateMoving.h"
 
-#include "Kismet/GameplayStatics.h"
-#include "Pong3D/Paddle.h"
-
-void UPaddleStateMoving::Enter(AActor* Owner, UUStateMachineComponent* StateMachine)
-{
-	Super::Enter(Owner, StateMachine);
-
-
-}
+// Project Includes
+#include "Paddle.h"
 
 void UPaddleStateMoving::Update(AActor* Owner, UUStateMachineComponent* StateMachine, float DeltaTime)
 {
@@ -53,16 +46,4 @@ void UPaddleStateMoving::Update(AActor* Owner, UUStateMachineComponent* StateMac
 
 	// Apply velocity
 	PhysicsComp->SetPhysicsLinearVelocity(Velocity, false);
-}
-
-void UPaddleStateMoving::Exit(AActor* Owner, UUStateMachineComponent* StateMachine)
-{
-	Super::Exit(Owner, StateMachine);
-
-
-}
-
-UStateBase* UPaddleStateMoving::HandleInput(AActor* Owner, UUStateMachineComponent* StateMachine)
-{
-	return Super::HandleInput(Owner, StateMachine);
 }

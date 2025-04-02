@@ -1,5 +1,9 @@
 #pragma once
 
+/**
+ * Player_1(Left) and Player_2(Right)
+ * AI Implementation (Out of the Scope of this project)
+ */
 UENUM(BluePrintType)
 enum class EPaddleType : uint8
 {

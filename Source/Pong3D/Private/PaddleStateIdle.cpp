@@ -2,7 +2,9 @@
 
 
 #include "PaddleStateIdle.h"
-#include "Pong3D/Paddle.h"
+
+// Project Includes
+#include "Paddle.h"
 
 void UPaddleStateIdle::Update(AActor* Owner, UUStateMachineComponent* StateMachine, float DeltaTime)
 {

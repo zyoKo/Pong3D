@@ -7,7 +7,7 @@
 #include "PaddleStateIdle.generated.h"
 
 /**
- * 
+ * Paddle State Idle State For the APaddle Class
  */
 UCLASS()
 class PONG3D_API UPaddleStateIdle : public UPaddleStateBase

@@ -7,7 +7,7 @@
 #include "BallStateIdle.generated.h"
 
 /**
- * 
+ * Implementation now currently used.
  */
 UCLASS()
 class PONG3D_API UBallStateIdle : public UBallStateBase

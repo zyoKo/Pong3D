@@ -7,14 +7,12 @@
 #include "PaddleStateHit.generated.h"
 
 /**
- * 
+ * Paddle State Hit State For the APaddle Class
  */
 UCLASS()
 class PONG3D_API UPaddleStateHit : public UPaddleStateBase
 {
 	GENERATED_BODY()
-
-	friend class APaddle;
 
 public:
 	virtual void Enter(AActor* Owner, UUStateMachineComponent* StateMachine) override;

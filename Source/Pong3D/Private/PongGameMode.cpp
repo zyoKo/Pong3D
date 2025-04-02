@@ -3,12 +3,14 @@
 
 #include "PongGameMode.h"
 
+// Engine Includes
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
 
+// Project Includes
+#include "Ball.h"
+#include "Paddle.h"
 #include "PongPlayerController.h"
-#include "Pong3D/Ball.h"
-#include "Pong3D/Paddle.h"
 
 APongGameMode::APongGameMode()
 {
@@ -28,6 +30,8 @@ void APongGameMode::InitGame(const FString& MapName, const FString& Options, FSt
     // Spawn or find both Paddles
 	FindOrSpawnPaddle(EPaddleType::PLAYER_1);
 	FindOrSpawnPaddle(EPaddleType::PLAYER_2);
+
+	//FindOrSpawnBall();
 }
 
 void APongGameMode::BeginPlay()
@@ -70,7 +74,7 @@ void APongGameMode::FindOrSpawnPaddle(EPaddleType PaddleType) const
             return;
         }
     }
-	// --
+	//--
 
     //-- Not found — spawn a new one --//
 	FVector SpawnLocation = GetSpawnLocationForPaddleType(PaddleType);
@@ -82,11 +86,76 @@ void APongGameMode::FindOrSpawnPaddle(EPaddleType PaddleType) const
     FActorSpawnParameters SpawnParams;
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-    APaddle* NewPaddle = World->SpawnActor<APaddle>(APaddle::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
-    if (NewPaddle)
+	APaddle* NewPaddle;
+	if (!PaddleClass)
+	{
+		NewPaddle = World->SpawnActor<APaddle>(APaddle::StaticClass(), SpawnLocation, SpawnRotation, SpawnParams);
+	}
+	else
+	{
+		NewPaddle = World->SpawnActor<APaddle>(PaddleClass, SpawnLocation, SpawnRotation, SpawnParams);
+	}
+
+    if (!NewPaddle)
     {
-        NewPaddle->SetPaddleType(PaddleType);
+		UE_LOG(LogTemp, Warning, TEXT("Failed to Create Paddle Class!"));
+		return;
     }
+	NewPaddle->SetPaddleType(PaddleType);
+	//--
+}
+
+void APongGameMode::FindOrSpawnBall() const
+{
+	UWorld* World = GetWorld();
+    if (!World) 
+    {
+    	return;
+    }
+
+    //-- Look for existing paddle of the given type --//
+	TArray<AActor*> BallArray;
+    UGameplayStatics::GetAllActorsOfClass(World, ABall::StaticClass(), BallArray);
+	SIZE_T TotalBallActorsInScene = BallArray.Num();
+	if (TotalBallActorsInScene > 1)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Multiple Balls found in the Scene!"));
+
+		// Removing All Other Balls except 1
+		for (SIZE_T BallActorIndex = 1; BallActorIndex < TotalBallActorsInScene; ++BallActorIndex)
+		{
+			BallArray[BallActorIndex]->Destroy();
+		}
+
+		if (ABall* Ball = Cast<ABall>(BallArray[0]))
+		{
+			Ball->SetActorLocation(BallSpawnLocation);
+		}
+
+		return;
+	} else if (TotalBallActorsInScene == 1)
+	{
+		if (ABall* Ball = Cast<ABall>(BallArray[0]))
+		{
+			Ball->SetActorLocation(BallSpawnLocation);
+		}
+
+		return;
+	}
+	//--
+
+	//-- If we can't find Ball then Spawn --//
+	// Always Spawn - Optional (Should never happen)
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	ABall* NewBall = World->SpawnActor<ABall>(ABall::StaticClass(), BallSpawnLocation, FRotator::ZeroRotator, SpawnParams);
+	if (!NewBall)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to Create Ball Class!"));
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("New Ball Spawned in the Scene!"));
 	//--
 }
 

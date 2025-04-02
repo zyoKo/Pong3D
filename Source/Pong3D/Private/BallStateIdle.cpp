@@ -6,7 +6,7 @@
 #include "PongGameMode.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Pong3D/Ball.h"
+#include "Ball.h"
 
 void UBallStateIdle::Enter(AActor* Owner, UUStateMachineComponent* StateMachine)
 {
@@ -19,8 +19,7 @@ void UBallStateIdle::Update(AActor* Owner, UUStateMachineComponent* StateMachine
 {
 	Super::Update(Owner, StateMachine, DeltaTime);
 
-	ABall* Ball = Cast<ABall>(Owner);
-	if (Ball && Ball->bLaunchBall)
+	if (ABall* Ball = Cast<ABall>(Owner))
 	{
 		LaunchInRandomDirection(Owner, StateMachine);
 
@@ -30,8 +29,7 @@ void UBallStateIdle::Update(AActor* Owner, UUStateMachineComponent* StateMachine
 
 void UBallStateIdle::ResetBall(AActor* Owner)
 {
-	ABall* Ball = Cast<ABall>(Owner);
-	if (Ball && Ball->bLaunchBall)
+	if (ABall* Ball = Cast<ABall>(Owner))
 	{
 		// Reset Ball to Origin
 		Ball->SetActorLocation(FVector::ZeroVector);
@@ -60,8 +58,6 @@ void UBallStateIdle::LaunchInRandomDirection(AActor* Owner, UUStateMachineCompon
 
 	// Get Box Collider
 	UBoxComponent* BoxCollider = Ball->GetBoxCollider();
-
-	Ball->bLaunchBall = false;
 
 	float MinZAngle = -20.0f;
     float MaxZAngle =  20.0f;

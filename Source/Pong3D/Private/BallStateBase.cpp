@@ -9,19 +9,13 @@
 #include "UStateMachineComponent.h"
 
 void UBallStateBase::Enter(AActor* Owner, UUStateMachineComponent* StateMachine)
-{
-	
-}
+{ }
 
 void UBallStateBase::Update(AActor* Owner, UUStateMachineComponent* StateMachine, float DeltaTime)
-{
-	
-}
+{ }
 
 void UBallStateBase::Exit(AActor* Owner, UUStateMachineComponent* StateMachine)
-{
-	
-}
+{ }
 
 UStateBase* UBallStateBase::HandleInput(AActor* Owner, UUStateMachineComponent* StateMachine)
 {

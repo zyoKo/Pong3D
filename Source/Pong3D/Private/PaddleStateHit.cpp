@@ -3,14 +3,15 @@
 
 #include "PaddleStateHit.h"
 
-#include "UStateMachineComponent.h"
+// Engine Includes
 #include "Kismet/GameplayStatics.h"
 #include "Components/BoxComponent.h"
 
+// Project Includes
+#include "UStateMachineComponent.h"
 #include "PaddleStateIdle.h"
-#include "PaddleStateMoving.h"
-#include "Pong3D/Ball.h"
-#include "Pong3D/Paddle.h"
+#include "Ball.h"
+#include "Paddle.h"
 
 void UPaddleStateHit::Enter(AActor* Owner, UUStateMachineComponent* StateMachine)
 {
@@ -23,6 +24,12 @@ void UPaddleStateHit::Enter(AActor* Owner, UUStateMachineComponent* StateMachine
 
     if (Owner)
     {
+        APaddle* Paddle = Cast<APaddle>(UGameplayStatics::GetActorOfClass(GetWorld(), APaddle::StaticClass()));
+        if (Paddle)
+        {
+	        Paddle->PlayBounceSoundAtLocation();
+        }
+
         ReflectBallFromPaddle(Owner, StateMachine);
     }
 

@@ -3,25 +3,20 @@
 
 #include "PaddleStateBase.h"
 
+// Project Includes
 #include "PaddleStateHit.h"
 #include "PaddleStateIdle.h"
 #include "PaddleStateMoving.h"
 #include "UStateMachineComponent.h"
 
 void UPaddleStateBase::Enter(AActor* Owner, UUStateMachineComponent* StateMachine)
-{
-
-}
+{ }
 
 void UPaddleStateBase::Update(AActor* Owner, UUStateMachineComponent* StateMachine, float DeltaTime)
-{
-
-}
+{ }
 
 void UPaddleStateBase::Exit(AActor* Owner, UUStateMachineComponent* StateMachine)
-{
-
-}
+{ }
 
 UStateBase* UPaddleStateBase::HandleInput(AActor* Owner, UUStateMachineComponent* StateMachine)
 {
